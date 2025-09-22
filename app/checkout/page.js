@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaLock, FaCreditCard, FaMobile, FaCheckCircle } from 'react-icons/fa';
 import { CartContext } from '../context/CartContext'
+import { useCart } from '../context/CartContext';
 
 
 export default function CheckoutPage() {

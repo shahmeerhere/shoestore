@@ -1,0 +1,47 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://morva.com/sitemap.xml
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /checkout/
+Disallow: /cart/
+Disallow: /login/
+Disallow: /order-confirmation/
+Disallow: /track/
+
+# Allow important pages and categories
+Allow: /men
+Allow: /women
+Allow: /kids
+Allow: /products/
+Allow: /newarrival
+Allow: /onsale
+Allow: /acc
+Allow: /search
+Allow: /size-guide
+Allow: /shipping-info
+Allow: /return-policy
+Allow: /about
+Allow: /contact
+Allow: /faq
+
+# Crawl delay for better server performance
+Crawl-delay: 1
+
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1

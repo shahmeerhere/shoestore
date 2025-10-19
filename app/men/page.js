@@ -6,63 +6,55 @@ import { useCart } from "../context/CartContext";
 import { getProductsByCategory } from "../data/products";
 
 export default function MenPage() {
-  const [selectedColors, setSelectedColors] = useState({})
-  const [wishlist, setWishlist] = useState(new Set())
-  const [subcategoryFilter, setSubcategoryFilter] = useState('all')
-  const [sortBy, setSortBy] = useState('default')
-  const { addToCart } = useCart()
+  const [wishlist, setWishlist] = useState(new Set());
+  const [subcategoryFilter, setSubcategoryFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("default");
+  const { addToCart } = useCart();
 
-  const products = getProductsByCategory("Men's Shoes")
-  
-  // Initialize selected colors
-  React.useEffect(() => {
-    const colors = products.reduce((acc, shoe) => {
-      acc[shoe.id] = Object.keys(shoe.colors)[0]
-      return acc
-    }, {})
-    setSelectedColors(colors)
-  }, [products])
-
-  const handleColorChange = (shoeId, colorKey) => {
-    setSelectedColors((prev) => ({ ...prev, [shoeId]: colorKey }))
-  }
+  const products = getProductsByCategory("Men's Shoes");
 
   const handleAddToCart = (shoe) => {
-    const selectedColor = selectedColors[shoe.id]
-    addToCart(shoe, selectedColor, 'M', 1)
-    alert(`${shoe.name} added to cart!`)
-  }
+    const defaultColor = Object.keys(shoe.colors)[0]; // fallback to first color
+    addToCart(shoe, defaultColor, "M", 1);
+    alert(`${shoe.name} added to cart!`);
+  };
 
   const handleWishlist = (shoeId) => {
-    setWishlist(prev => {
-      const newWishlist = new Set(prev)
+    setWishlist((prev) => {
+      const newWishlist = new Set(prev);
       if (newWishlist.has(shoeId)) {
-        newWishlist.delete(shoeId)
+        newWishlist.delete(shoeId);
       } else {
-        newWishlist.add(shoeId)
+        newWishlist.add(shoeId);
       }
-      return newWishlist
-    })
-  }
+      return newWishlist;
+    });
+  };
 
   // Get unique subcategories
-  const subcategories = [...new Set(products.map(product => product.subcategory))]
+  const subcategories = [...new Set(products.map((product) => product.subcategory))];
 
   // Filter products
-  let filteredProducts = products
-  if (subcategoryFilter !== 'all') {
-    filteredProducts = products.filter(product => product.subcategory === subcategoryFilter)
+  let filteredProducts = products;
+  if (subcategoryFilter !== "all") {
+    filteredProducts = products.filter(
+      (product) => product.subcategory === subcategoryFilter
+    );
   }
 
   // Sort products
-  if (sortBy === 'price-low') {
-    filteredProducts = [...filteredProducts].sort((a, b) => a.discountedPrice - b.discountedPrice)
-  } else if (sortBy === 'price-high') {
-    filteredProducts = [...filteredProducts].sort((a, b) => b.discountedPrice - a.discountedPrice)
-  } else if (sortBy === 'rating') {
-    filteredProducts = [...filteredProducts].sort((a, b) => b.rating - a.rating)
-  } else if (sortBy === 'newest') {
-    filteredProducts = [...filteredProducts].sort((a, b) => b.id - a.id)
+  if (sortBy === "price-low") {
+    filteredProducts = [...filteredProducts].sort(
+      (a, b) => a.discountedPrice - b.discountedPrice
+    );
+  } else if (sortBy === "price-high") {
+    filteredProducts = [...filteredProducts].sort(
+      (a, b) => b.discountedPrice - a.discountedPrice
+    );
+  } else if (sortBy === "rating") {
+    filteredProducts = [...filteredProducts].sort((a, b) => b.rating - a.rating);
+  } else if (sortBy === "newest") {
+    filteredProducts = [...filteredProducts].sort((a, b) => b.id - a.id);
   }
 
   return (
@@ -71,7 +63,9 @@ export default function MenPage() {
       <div className="bg-gradient-to-r from-gray-900 to-black text-white py-16">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h1 className="text-5xl font-bold mb-4">Men's Collection</h1>
-          <p className="text-xl text-gray-300 mb-8">Discover premium footwear designed for the modern man</p>
+          <p className="text-xl text-gray-300 mb-8">
+            Discover premium footwear designed for the modern man
+          </p>
           <div className="flex justify-center space-x-4">
             <span className="bg-white text-black px-4 py-2 rounded-full text-sm font-semibold">
               {filteredProducts.length} Products
@@ -94,12 +88,14 @@ export default function MenPage() {
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
             >
               <option value="all">All Types</option>
-              {subcategories.map(subcategory => (
-                <option key={subcategory} value={subcategory}>{subcategory}</option>
+              {subcategories.map((subcategory) => (
+                <option key={subcategory} value={subcategory}>
+                  {subcategory}
+                </option>
               ))}
             </select>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <span className="text-gray-700 font-medium">Sort by:</span>
             <select
@@ -119,8 +115,8 @@ export default function MenPage() {
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map((shoe) => {
-            const selectedColor = selectedColors[shoe.id]
-            const isWishlisted = wishlist.has(shoe.id)
+            const defaultColor = Object.keys(shoe.colors)[0];
+            const isWishlisted = wishlist.has(shoe.id);
 
             return (
               <div
@@ -131,18 +127,20 @@ export default function MenPage() {
                 <div className="relative aspect-square overflow-hidden">
                   <Link href={`/products/${shoe.id}`}>
                     <img
-                      src={shoe.colors[selectedColor]?.image || shoe.colors[Object.keys(shoe.colors)[0]].image}
-                      alt={`${shoe.name} in ${selectedColor}`}
+                      src={shoe.colors[defaultColor].image}
+                      alt={`${shoe.name}`}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </Link>
-                  
+
                   {/* Quick Actions */}
                   <div className="absolute top-2 right-2 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <button
                       onClick={() => handleWishlist(shoe.id)}
                       className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        isWishlisted ? 'bg-red-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-100'
+                        isWishlisted
+                          ? "bg-red-500 text-white"
+                          : "bg-white text-gray-600 hover:bg-gray-100"
                       }`}
                     >
                       <FaHeart className="w-4 h-4" />
@@ -178,7 +176,9 @@ export default function MenPage() {
                 {/* Product Info */}
                 <div className="p-4">
                   <div className="mb-2">
-                    <h3 className="font-semibold text-lg text-black mb-1">{shoe.name}</h3>
+                    <h3 className="font-semibold text-lg text-black mb-1">
+                      {shoe.name}
+                    </h3>
                     <p className="text-sm text-gray-600">{shoe.brand}</p>
                     <p className="text-xs text-gray-500">{shoe.subcategory}</p>
                   </div>
@@ -189,11 +189,17 @@ export default function MenPage() {
                       {[...Array(5)].map((_, i) => (
                         <FaStar
                           key={i}
-                          className={`w-4 h-4 ${i < Math.floor(shoe.rating) ? 'text-yellow-400' : 'text-gray-300'}`}
+                          className={`w-4 h-4 ${
+                            i < Math.floor(shoe.rating)
+                              ? "text-yellow-400"
+                              : "text-gray-300"
+                          }`}
                         />
                       ))}
                     </div>
-                    <span className="ml-2 text-sm text-gray-600">({shoe.reviews})</span>
+                    <span className="ml-2 text-sm text-gray-600">
+                      ({shoe.reviews})
+                    </span>
                   </div>
 
                   {/* Price */}
@@ -208,23 +214,6 @@ export default function MenPage() {
                     )}
                   </div>
 
-                  {/* Color Selection */}
-                  <div className="flex justify-center space-x-2 mb-4">
-                    {Object.entries(shoe.colors).map(([colorKey, colorData]) => (
-                      <button
-                        key={colorKey}
-                        onClick={() => handleColorChange(shoe.id, colorKey)}
-                        className={`w-6 h-6 rounded-full border-2 ${
-                          selectedColor === colorKey
-                            ? "border-black"
-                            : "border-gray-300"
-                        } transition-all duration-200`}
-                        style={{ backgroundColor: colorData.hex }}
-                        aria-label={`Select ${colorData.name} color for ${shoe.name}`}
-                      />
-                    ))}
-                  </div>
-
                   {/* Add to Cart Button */}
                   <button
                     onClick={() => handleAddToCart(shoe)}
@@ -235,7 +224,7 @@ export default function MenPage() {
                   </button>
                 </div>
               </div>
-            )
+            );
           })}
         </div>
 
@@ -243,10 +232,12 @@ export default function MenPage() {
         {filteredProducts.length === 0 && (
           <div className="text-center py-12">
             <FaFilter className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No products found</h3>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              No products found
+            </h3>
             <p className="text-gray-500 mb-6">Try adjusting your filter criteria</p>
             <button
-              onClick={() => setSubcategoryFilter('all')}
+              onClick={() => setSubcategoryFilter("all")}
               className="bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
             >
               Show All Products

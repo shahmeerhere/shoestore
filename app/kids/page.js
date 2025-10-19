@@ -1,10 +1,14 @@
 "use client";
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { FaShoppingCart } from "react-icons/fa";
+import { useCart } from "../context/CartContext";
 
 const products = [
   {
     id: 1,
     name: "Air Jordan 1 Mid",
+    brand: "Jordan",
     price: 120,
     colors: {
       red: { hex: "#FF0000", image: "/shoes/jordan1-red.png" },
@@ -14,6 +18,7 @@ const products = [
   {
     id: 2,
     name: "Nike Air Force 1",
+    brand: "Nike",
     price: 100,
     colors: {
       white: { hex: "#FFFFFF", image: "/shoes/airforce1-white.png" },
@@ -23,165 +28,127 @@ const products = [
   {
     id: 3,
     name: "Yeezy Boost 350",
+    brand: "Adidas",
     price: 200,
     colors: {}, // no colors example
   },
 ];
 
 export default function KidsPage() {
-  const [selectedColors, setSelectedColors] = useState({});
-  const [cart, setCart] = useState([]);
+  const { addToCart } = useCart();
 
-  // Initialize selected colors
-  useEffect(() => {
-    if (products.length > 0) {
-      const colors = products.reduce((acc, shoe) => {
-        const firstColorKey =
-          shoe.colors && Object.keys(shoe.colors).length > 0
-            ? Object.keys(shoe.colors)[0]
-            : "default";
-        acc[shoe.id] = firstColorKey;
-        return acc;
-      }, {});
-      setSelectedColors(colors);
-    }
-  }, []);
+  // Track selected color per product
+  const [selectedColors, setSelectedColors] = useState(
+    products.reduce((acc, product) => {
+      const firstColorKey =
+        product.colors && Object.keys(product.colors).length > 0
+          ? Object.keys(product.colors)[0]
+          : "default";
+      acc[product.id] = firstColorKey;
+      return acc;
+    }, {})
+  );
 
-  const handleColorChange = (shoeId, colorKey) => {
-    setSelectedColors((prev) => ({
-      ...prev,
-      [shoeId]: colorKey,
-    }));
+  const handleColorChange = (productId, colorKey) => {
+    setSelectedColors((prev) => ({ ...prev, [productId]: colorKey }));
   };
 
-  const handleAddToCart = (shoe) => {
-    const colorKey = selectedColors[shoe.id];
-    const selectedColor = shoe.colors?.[colorKey] || null;
-
-    setCart((prevCart) => [
-      ...prevCart,
-      {
-        id: shoe.id,
-        name: shoe.name,
-        price: shoe.price,
-        color: colorKey,
-        image:
-          selectedColor?.image ||
-          Object.values(shoe.colors || {})[0]?.image ||
-          "/placeholder.png",
-      },
-    ]);
-  };
-
-  const handleRemoveFromCart = (index) => {
-    setCart((prevCart) => prevCart.filter((_, i) => i !== index));
+  const handleAddToCart = (product) => {
+    const selectedColor = selectedColors[product.id];
+    const colorObj = product.colors?.[selectedColor];
+    const cartItem = {
+      ...product,
+      color: selectedColor,
+      image: colorObj?.image || "/placeholder.png",
+      price: product.price,
+      size: "Kids Size",
+    };
+    addToCart(cartItem, selectedColor, "Kids Size", 1);
+    alert(`${product.name} (${selectedColor}) added to cart!`);
   };
 
   return (
-    <div className="flex flex-col md:flex-row">
-      {/* Product Grid */}
-      <div className="flex-1 p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {products.map((shoe) => {
-          const selectedColorKey = selectedColors[shoe.id];
-          const selectedImage =
-            shoe.colors?.[selectedColorKey]?.image ||
-            Object.values(shoe.colors || {})[0]?.image ||
+    <div className="bg-gradient-to-br from-white via-gray-50 to-gray-100 min-h-screen py-12 px-4 md:px-8">
+      {/* Hero */}
+      <div className="text-center mb-12">
+        <h1 className="text-5xl md:text-6xl font-bold mb-4 text-black">
+          Kids Sneakers Collection
+        </h1>
+        <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+          Premium sneakers for your little champions. Fun colors, comfy fit, and safe designs.
+        </p>
+      </div>
+
+      {/* Products Grid */}
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        {products.map((product, index) => {
+          const selectedColor = selectedColors[product.id];
+          const imageSrc =
+            product.colors?.[selectedColor]?.image ||
+            Object.values(product.colors || {})[0]?.image ||
             "/placeholder.png";
 
           return (
-            <div
-              key={shoe.id}
-              className="border p-4 rounded-xl shadow hover:shadow-lg transition"
+            <motion.div
+              key={product.id}
+              className="group bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 flex flex-col items-center"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              whileHover={{ y: -8, scale: 1.02 }}
             >
-              <img
-                src={selectedImage}
-                alt={shoe.name}
-                className="w-full h-48 object-contain mb-4"
-              />
-              <h2 className="text-lg font-semibold">{shoe.name}</h2>
-              <p className="text-gray-600">${shoe.price}</p>
+              {/* Product Image */}
+              <div className="relative w-full mb-6 overflow-hidden rounded-xl">
+                <img
+                  src={imageSrc}
+                  alt={`${product.name} in ${selectedColor}`}
+                  className="w-full h-64 object-contain rounded-xl group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
 
-              <div className="flex gap-2 mt-3">
-                {Object.entries(shoe.colors || {}).length > 0 ? (
-                  Object.entries(shoe.colors).map(([colorKey, colorData]) => (
+              {/* Name */}
+              <h3 className="text-lg font-bold text-black mb-2">{product.name}</h3>
+              <p className="text-sm text-gray-500 mb-4">{product.brand}</p>
+
+              {/* Price */}
+              <p className="text-xl font-bold text-black mb-4">${product.price}</p>
+
+              {/* Color Selection */}
+              <div className="flex gap-3 mb-6">
+                {Object.entries(product.colors).length > 0 ? (
+                  Object.entries(product.colors).map(([colorKey, colorData]) => (
                     <button
                       key={colorKey}
-                      onClick={() => handleColorChange(shoe.id, colorKey)}
-                      className={`w-6 h-6 rounded-full border-2 ${
-                        selectedColorKey === colorKey
-                          ? "border-blue-500"
+                      onClick={() => handleColorChange(product.id, colorKey)}
+                      className={`w-8 h-8 rounded-full border-2 shadow-lg hover:scale-110 transition-all duration-300 ${
+                        selectedColor === colorKey
+                          ? "border-black ring-2 ring-gray-200"
                           : "border-gray-300"
                       }`}
                       style={{ backgroundColor: colorData.hex || "#ccc" }}
+                      aria-label={`Select ${colorKey}`}
                     />
                   ))
                 ) : (
-                  <span className="text-sm text-gray-400">
-                    No colors available
-                  </span>
+                  <span className="text-gray-400 text-sm">No colors</span>
                 )}
               </div>
 
-              <button
-                onClick={() => handleAddToCart(shoe)}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              {/* Add to Cart */}
+              <motion.button
+                onClick={() => handleAddToCart(product)}
+                className="w-full bg-gradient-to-r from-black to-gray-800 hover:from-gray-800 hover:to-gray-900 text-white font-semibold py-3 px-6 rounded-xl flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                Add to Cart
-              </button>
-            </div>
+                <FaShoppingCart className="w-4 h-4" />
+                <span>Add to Cart</span>
+              </motion.button>
+            </motion.div>
           );
         })}
-      </div>
-
-      {/* Cart Sidebar */}
-      <div className="w-full md:w-1/3 border-l p-6 bg-gray-50">
-        <h2 className="text-xl font-bold mb-4">🛒 Cart</h2>
-        {cart.length === 0 ? (
-          <p className="text-gray-500">Your cart is empty</p>
-        ) : (
-          <ul className="space-y-4">
-            {cart.map((item, index) => (
-              <li
-                key={index}
-                className="flex items-center justify-between bg-white p-3 rounded-lg shadow"
-              >
-                <div className="flex items-center gap-3">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-12 h-12 object-contain"
-                  />
-                  <div>
-                    <p className="font-medium">{item.name}</p>
-                    <p className="text-sm text-gray-600">
-                      ${item.price}{" "}
-                      {item.color !== "default" && `( ${item.color} )`}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleRemoveFromCart(index)}
-                  className="text-red-500 hover:underline text-sm"
-                >
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {cart.length > 0 && (
-          <div className="mt-6 border-t pt-4">
-            <p className="font-bold">
-              Total: $
-              {cart.reduce((total, item) => total + item.price, 0).toFixed(2)}
-            </p>
-            <button className="mt-3 w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-              Checkout
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
 }
+
